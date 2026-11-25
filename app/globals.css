@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f3f2fa;
+  --card: #ffffff;
+  --fg: #15132b;
+  --muted: #646287;
+  --border: #e3e1f1;
+  --primary: #9333ea;
+  --primary-fg: #ffffff;
+  --income: #15803d;
+  --expense: #dc2626;
+  --warn: #b45309;
+  --ring: rgba(147, 51, 234, 0.35);
+  --c1: #9333ea; --c2: #0891b2; --c3: #d97706; --c4: #059669; --c5: #db2777; --c6: #4f46e5; --c7: #ea580c; --c8: #65a30d;
+  color-scheme: light;
+}
+/* Theme: follows the system unless the user picked one in Settings (data-theme on <html>).
+   Dark is a deep navy with a violet/cyan accent pair; light keeps the same hues on a soft lavender canvas. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+  --bg: #070b22;
+  --card: #0d1434;
+  --fg: #e9edff;
+  --muted: #8e9bc9;
+  --border: #1c2653;
+  --primary: #c85bf5;
+  --primary-fg: #14012a;
+  --income: #34d399;
+  --expense: #fb7185;
+  --warn: #fbbf24;
+  --ring: rgba(200, 91, 245, 0.45);
+  --c1: #c85bf5; --c2: #22c7f5; --c3: #fbbf24; --c4: #34d399; --c5: #f472b6; --c6: #6d8cff; --c7: #fb923c; --c8: #a3e635;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #070b22;
+  --card: #0d1434;
+  --fg: #e9edff;
+  --muted: #8e9bc9;
+  --border: #1c2653;
+  --primary: #c85bf5;
+  --primary-fg: #14012a;
+  --income: #34d399;
+  --expense: #fb7185;
+  --warn: #fbbf24;
+  --ring: rgba(200, 91, 245, 0.45);
+  --c1: #c85bf5; --c2: #22c7f5; --c3: #fbbf24; --c4: #34d399; --c5: #f472b6; --c6: #6d8cff; --c7: #fb923c; --c8: #a3e635;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-fg: var(--primary-fg);
+  --color-income: var(--income);
+  --color-expense: var(--expense);
+  --color-warn: var(--warn);
+  /* categorical chart palette: referenced here so the build keeps the --cN variables (charts read them inline) */
+  --color-chart-1: var(--c1); --color-chart-2: var(--c2); --color-chart-3: var(--c3); --color-chart-4: var(--c4);
+  --color-chart-5: var(--c5); --color-chart-6: var(--c6); --color-chart-7: var(--c7); --color-chart-8: var(--c8);
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+dialog::backdrop { background: rgba(4, 7, 24, 0.62); backdrop-filter: blur(2px); }
+
+/* Brand wordmark: one image per background, picked by the same rules as the colour tokens. */
+.logo-on-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .logo-on-dark { display: block; }
+  :root:not([data-theme="light"]) .logo-on-light { display: none; }
+}
+:root[data-theme="dark"] .logo-on-dark { display: block; }
+:root[data-theme="dark"] .logo-on-light { display: none; }
+
+
+/* Admin builds on the same palette; an amber strip marks it as the operator console, not the customer app. */
+.admin-strip { background: linear-gradient(90deg, var(--warn), var(--primary)); height: 3px; }
+@media (prefers-reduced-motion: no-preference) {
+  .fade-in { animation: fade-in 0.25s ease-out both; }
+  @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+}
+
+.spinner { animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.skeleton { background: color-mix(in srgb, var(--border) 70%, transparent); }
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton { animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: 0.55; } }
+}
