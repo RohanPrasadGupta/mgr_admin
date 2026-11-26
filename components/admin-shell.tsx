@@ -5,13 +5,16 @@ import { useState, type ReactNode } from "react";
 import { authPost } from "@/lib/api/client";
 import { useMe } from "@/lib/api/hooks";
 import { Wordmark } from "./brand";
-import { cx } from "./ui";
+import { ChangePasswordForm, RequiredPasswordChange } from "./change-password";
+import { Modal, cx } from "./ui";
+import { toast } from "@/lib/toast";
 
 const NAV = [
   { href: "/", label: "Overview", icon: "▦" },
   { href: "/users", label: "Users", icon: "◉" },
   { href: "/audit", label: "Audit log", icon: "☰" },
   { href: "/health", label: "System health", icon: "♥" },
+  { href: "/admins", label: "Admins", icon: "⚿", ownerOnly: true },
 ] as const;
 
 const active = (path: string, href: string) => (href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`));
@@ -32,12 +35,16 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const { data: me } = useMe();
   const [signingOut, setSigningOut] = useState(false);
   const [open, setOpen] = useState(false);
+  const [pwOpen, setPwOpen] = useState(false);
 
   async function signOut() {
     setSigningOut(true);
     await authPost("logout").catch(() => undefined);
     window.location.replace("/login");
   }
+
+  if (me?.mustChangePassword) return <RequiredPasswordChange name={me.name} onSignOut={signOut} />;
+  const nav = NAV.filter((n) => !("ownerOnly" in n) || me?.role === "owner");
 
   return (
     <div className="min-h-screen">
@@ -51,7 +58,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <div className="hidden items-center gap-2 px-5 pb-1 pt-5 lg:flex"><Wordmark height={24} priority /></div>
           <p className="hidden px-5 text-xs font-semibold uppercase tracking-wider text-warn lg:block">Admin console</p>
           <nav aria-label="Admin" className="space-y-0.5 p-3 lg:mt-3">
-            {NAV.map((n) => (
+            {nav.map((n) => (
               <Link key={n.href} href={n.href} onClick={() => setOpen(false)} aria-current={active(path, n.href) ? "page" : undefined}
                 className={cx("flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition", active(path, n.href) ? "bg-primary/12 text-primary" : "text-muted hover:bg-border/40 hover:text-fg")}>
                 <span aria-hidden className="w-4 text-center">{n.icon}</span>{n.label}
@@ -61,8 +68,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <div className="mt-auto space-y-2 border-t border-border p-4">
             <div className="min-w-0">
               <p className="truncate text-sm font-medium">{me?.name ?? "…"}</p>
-              <p className="truncate text-xs text-muted">{me?.email}</p>
+              <p className="truncate text-xs text-muted">{me?.email}{me?.role === "owner" && " · owner"}</p>
             </div>
+            <button type="button" onClick={() => setPwOpen(true)} className="text-sm text-muted underline-offset-2 hover:text-fg hover:underline">Change password</button>
             <div className="flex items-center justify-between">
               <button type="button" onClick={signOut} disabled={signingOut} className="text-sm text-muted underline-offset-2 hover:text-fg hover:underline">{signingOut ? "Signing out…" : "Sign out"}</button>
               <ThemeToggle />
@@ -71,6 +79,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </aside>
         <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
+      <Modal open={pwOpen} onClose={() => setPwOpen(false)} title="Change your password"><ChangePasswordForm onDone={() => { setPwOpen(false); toast.success("Password changed"); }} /></Modal>
     </div>
   );
 }

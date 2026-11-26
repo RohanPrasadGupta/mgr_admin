@@ -6,6 +6,7 @@ import type { components } from "./schema";
 export type Schemas = components["schemas"];
 export type AdminUserRow = Schemas["AdminUserRow"];
 export type AdminUserDetail = Schemas["AdminUserDetail"];
+export type AdminAccount = Schemas["AdminAccount"];
 // Free-form JSON objects come out of openapi-typescript as Record<string, never>; read them as unknown values.
 export type AuditEntry = Omit<Schemas["AuditEntry"], "meta"> & { meta: Record<string, unknown> | null };
 export type SupportRows = { kind: string; items: Record<string, unknown>[]; truncated: boolean };
@@ -22,10 +23,13 @@ export const keys = {
   data: (id: string, kind: string) => ["admin", "user", id, "data", kind] as const,
   audit: (q: object) => ["admin", "audit", q] as const,
   health: ["admin", "health"] as const,
+  admins: ["admin", "admins"] as const,
 };
 
 export const useMe = () => useQuery({ queryKey: keys.me, queryFn: async () => (await call(client.GET("/admin/me"))).data, staleTime: 5 * 60_000 });
 export const useStats = () => useQuery({ queryKey: keys.stats, queryFn: async () => (await call(client.GET("/admin/stats"))).data, staleTime: 30_000 });
+/** Admin accounts: owners only (the API refuses everyone else), so it is only fetched for owners. */
+export const useAdmins = (enabled: boolean) => useQuery({ queryKey: keys.admins, queryFn: async () => (await call(client.GET("/admin/admins"))).data, enabled, staleTime: 10_000 });
 export const useHealth = () => useQuery({ queryKey: keys.health, queryFn: async () => (await call(client.GET("/admin/health"))).data, refetchInterval: 30_000 });
 
 export function useUsers(q: { q?: string; status: UserStatus; page: number; pageSize?: number }) {

@@ -13,6 +13,7 @@ It talks to the same API as the apps (`mgr_backend`), through the admin routes u
 | **Users** | Search by email or name, filter by status, paged. |
 | **User detail** | Profile, record counts, signed-in devices, recent admin activity, actions, and the support view. |
 | **Audit log** | Every admin sign-in, action and support-view read, filterable by action and user. |
+| **Admins** (owners only) | Add admins with a one-time password (shown once), disable/enable, reset password or authenticator, make owner/regular. Each change needs a reason and is audited. |
 | **System health** | Database, Redis, exchange rates, email and receipt storage checks, refreshed every 30 s. |
 
 ### Actions on a user
@@ -26,7 +27,7 @@ and **every tab you open is written to the audit log**. The API enforces all of 
 
 ## Security model
 
-- **Separate admin accounts** (not customer accounts), created from the command line, with **mandatory 2FA**
+- **Separate admin accounts** (not customer accounts): the first owner is created from the command line, later ones by owners on the Admins page; **mandatory 2FA**; a one-time password must be replaced at first sign-in before anything else works
   (an authenticator app, TOTP). The first sign-in shows a QR code to enrol.
 - Admin tokens are signed with their own key (`ADMIN_SECRET` on the API) and can't be used on customer routes, or the reverse.
 - Sessions last at most `ADMIN_SESSION_HOURS` (12 h by default), whatever the activity.
